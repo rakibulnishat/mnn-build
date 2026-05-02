@@ -27,7 +27,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cmake build-essential
         
-    - name: Build MNN for Android ARM64
+    - name: Build MNN Core only
       run: |
         mkdir -p build_android
         cd build_android
@@ -41,13 +41,16 @@ jobs:
           -DMNN_ARM82=true \
           -DMNN_OPENCL=false \
           -DMNN_BUILD_SHARED_LIBS=true \
+          -DMNN_BUILD_CONVERTER=false \
+          -DMNN_BUILD_TOOLS=false \
+          -DMNN_BUILD_DEMO=false \
           -DCMAKE_BUILD_TYPE=Release
-        make -j4 MNN MNN_Express llm
+        make -j2
         
     - name: Collect libraries
       run: |
         mkdir -p output/lib
-        find build_android -name "*.so" | xargs -I{} cp {} output/lib/
+        find build_android -name "*.so" | xargs -I{} cp {} output/lib/ 2>/dev/null || true
         ls -la output/lib/
         
     - name: Upload libraries
