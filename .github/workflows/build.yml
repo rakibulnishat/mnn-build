@@ -18,9 +18,9 @@ jobs:
         
     - name: Setup Android NDK r21e
       run: |
-        wget -q https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
-        unzip -q android-ndk-r21e-linux-x86_64.zip
-        echo "ANDROID_NDK=$(pwd)/android-ndk-r21e" >> $GITHUB_ENV
+        wget -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        unzip -q android-ndk-r25c-linux.zip
+        echo "ANDROID_NDK=$(pwd)/android-ndk-r25c" >> $GITHUB_ENV
         
     - name: Install dependencies
       run: |
@@ -38,7 +38,7 @@ jobs:
           -DMNN_LOW_MEMORY=true \
           -DMNN_BUILD_LLM=true \
           -DMNN_SUPPORT_TRANSFORMER_FUSE=true \
-          -DMNN_ARM82=true \
+          -DMNN_ARM82=false \
           -DMNN_OPENCL=false \
           -DMNN_BUILD_SHARED_LIBS=true \
           -DMNN_BUILD_CONVERTER=false \
