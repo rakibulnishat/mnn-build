@@ -35,10 +35,9 @@ jobs:
       env:
         ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
       run: |
-        cd project/android
         mkdir -p build_64
         cd build_64
-        cmake ../.. \
+        cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=arm64-v8a \
           -DANDROID_NATIVE_API_LEVEL=26 \
@@ -57,6 +56,6 @@ jobs:
       with:
         name: mnn-android-libs
         path: |
-          project/android/build_64/lib/*.so
-          project/android/build_64/include/
+          build_64/lib/*.so
+          build_64/include/
         retention-days: 7
