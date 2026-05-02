@@ -1,4 +1,5 @@
 name: Build MNN Libraries for Android
+
 on:
   push:
     branches: [ main ]
@@ -15,42 +16,43 @@ jobs:
         repository: alibaba/MNN
         ref: master
         
-    - name: Setup Android NDK
-      id: setup-ndk
-      uses: nttld/setup-ndk@v1
-      with:
-        ndk-version: r25c
-        add-to-path: true
-
+    - name: Setup Android NDK r21e
+      run: |
+        wget -q https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+        unzip -q android-ndk-r21e-linux-x86_64.zip
+        echo "ANDROID_NDK=$(pwd)/android-ndk-r21e" >> $GITHUB_ENV
+        
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake build-essential ninja-build
-
+        sudo apt-get install -y cmake build-essential
+        
     - name: Build MNN for Android ARM64
       run: |
-        mkdir -p build_64
-        cd build_64
+        mkdir -p build_android
+        cd build_android
         cmake .. \
-          -DCMAKE_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=arm64-v8a \
-          -DANDROID_NATIVE_API_LEVEL=26 \
+          -DANDROID_PLATFORM=android-26 \
           -DMNN_LOW_MEMORY=true \
           -DMNN_BUILD_LLM=true \
           -DMNN_SUPPORT_TRANSFORMER_FUSE=true \
           -DMNN_ARM82=true \
-          -DMNN_OPENCL=true \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX=. \
-          -GNinja
-        ninja -j4
-        ninja install
+          -DMNN_OPENCL=false \
+          -DMNN_BUILD_SHARED_LIBS=true \
+          -DCMAKE_BUILD_TYPE=Release
+        make -j4 MNN MNN_Express llm
+        
+    - name: Collect libraries
+      run: |
+        mkdir -p output/lib
+        find build_android -name "*.so" | xargs -I{} cp {} output/lib/
+        ls -la output/lib/
         
     - name: Upload libraries
       uses: actions/upload-artifact@v4
       with:
         name: mnn-android-libs
-        path: |
-          build_64/lib/*.so
-          build_64/include/
+        path: output/
         retention-days: 7
